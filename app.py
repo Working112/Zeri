@@ -1,20 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-@app.route("/square", methods=["POST"])
-def calculate_square():
-    data = request.json  # Get JSON data from the frontend
-    number = data.get("number")
-    
-    if number is None:
-        return jsonify({"error": "No number provided"}), 400
+@app.route("/")
+def home():
+    return render_template("index.html")
 
+@app.route("/square", methods=["GET"])
+def calculate_square():
     try:
-        number = float(number)  # Convert input to a float
+        number = float(request.args.get("number"))
         result = number ** 2
         return jsonify({"result": result})
-    except ValueError:
+    except (ValueError, TypeError):
         return jsonify({"error": "Invalid input"}), 400
 
 if __name__ == "__main__":
