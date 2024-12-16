@@ -1,29 +1,35 @@
-from flask import Flask, send_file, request, jsonify
+from flask import Flask, request, jsonify, render_template
+import requests
 
 app = Flask(__name__)
 
-# Route to serve the index.html file
+# Route to serve the HTML file
 @app.route("/")
 def home():
+    return render_template("index.html")
+
+# Route to fetch weather data from Open-Meteo
+@app.route("/weather", methods=["GET"])
+def get_weather():
     try:
-        return send_file("index.html")  # Ensure index.html is in the root directory
+        # Get latitude and longitude from query parameters
+        latitude = request.args.get("latitude")
+        longitude = request.args.get("longitude")
+
+        if not latitude or not longitude:
+            return jsonify({"error": "Latitude and longitude are required!"}), 400
+
+        # Fetch weather data from Open-Meteo API
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=temperature_2m"
+        response = requests.get(url)
+
+        if response.status_code != 200:
+            return jsonify({"error": "Failed to fetch weather data"}), response.status_code
+
+        weather_data = response.json()
+        return jsonify(weather_data)  # Return the JSON response
     except Exception as e:
-        return f"Error: {e}", 500
+        return jsonify({"error": str(e)}), 500
 
-# Simple API route to calculate the square of a number
-@app.route("/square", methods=["GET"])
-def calculate_square():
-    try:
-        number = request.args.get("number")
-        if not number:
-            raise ValueError("No number provided")
-
-        number = float(number)  # Convert input to a number
-        result = number ** 2
-        return jsonify({"result": result})  # Return the square as JSON
-    except (ValueError, TypeError):
-        return jsonify({"error": "Invalid input"}), 400
-
-# Default Flask run configuration
 if __name__ == "__main__":
     app.run(debug=True)
