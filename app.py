@@ -1,29 +1,32 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="", template_folder="")  # Use the current root directory
 
-# Serve the HTML file
+# Route to serve the HTML file
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return send_file("index.html")  # Serve index.html directly from root folder
 
-# Fetch weather data from Open-Meteo API
+# Route to fetch weather data from Open-Meteo API
 @app.route("/weather", methods=["GET"])
 def get_weather():
     try:
+        # Get latitude and longitude from query parameters
         latitude = request.args.get("latitude")
         longitude = request.args.get("longitude")
 
         if not latitude or not longitude:
             return jsonify({"error": "Latitude and longitude are required!"}), 400
 
+        # Open-Meteo API URL
         url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=temperature_2m"
         response = requests.get(url)
 
         if response.status_code != 200:
             return jsonify({"error": "Failed to fetch weather data"}), response.status_code
 
+        # Return weather data as JSON
         weather_data = response.json()
         return jsonify(weather_data)
     except Exception as e:
