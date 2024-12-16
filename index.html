@@ -3,75 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Square Calculator</title>
+    <title>Weather App (Open-Meteo)</title>
     <style>
-        /* CSS Styling */
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
+            text-align: center;
             margin-top: 50px;
         }
-        input {
+        input, button {
             padding: 10px;
-            margin-right: 10px;
-            width: 200px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         button {
-            padding: 10px;
-            cursor: pointer;
             background-color: #007bff;
             color: white;
-            border: none;
-            border-radius: 5px;
+            cursor: pointer;
         }
         button:hover {
             background-color: #0056b3;
         }
         #result {
             margin-top: 20px;
-            font-size: 20px;
-            color: #333;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <!-- HTML Content -->
-    <div class="container">
-        <h1>Square Calculator</h1>
-        <input type="number" id="number" placeholder="Enter a number">
-        <button onclick="fetchSquare()">Calculate Square</button>
-        <div id="result"></div>
-    </div>
+    <h1>Weather App (Open-Meteo API)</h1>
+    <input type="number" step="0.01" id="latitude" placeholder="Enter Latitude">
+    <input type="number" step="0.01" id="longitude" placeholder="Enter Longitude">
+    <button onclick="fetchWeather()">Get Weather</button>
+    <div id="result"></div>
 
     <script>
-        // JavaScript Code
-        async function fetchSquare() {
-            const number = document.getElementById("number").value;
+        async function fetchWeather() {
+            const latitude = document.getElementById("latitude").value;
+            const longitude = document.getElementById("longitude").value;
             const resultDiv = document.getElementById("result");
 
-            if (!number) {
-                resultDiv.textContent = "Please enter a number.";
+            if (!latitude || !longitude) {
+                resultDiv.textContent = "Please enter both latitude and longitude.";
                 return;
             }
 
             try {
-                const response = await fetch(`/square?number=${number}`);
-                if (!response.ok) {
-                    throw new Error("Failed to calculate square");
-                }
+                const response = await fetch(`/weather?latitude=${latitude}&longitude=${longitude}`);
                 const data = await response.json();
-                if (data.result !== undefined) {
-                    resultDiv.textContent = `The square of ${number} is ${data.result}.`;
+
+                if (data.error) {
+                    resultDiv.textContent = `Error: ${data.error}`;
                 } else {
-                    resultDiv.textContent = "Error: " + data.error;
+                    const temperatures = data.hourly.temperature_2m;
+                    resultDiv.innerHTML = `
+                        <h3>Temperature Forecast:</h3>
+                        <p>${temperatures.slice(0, 5).join("°C, ")}°C...</p>
+                        <small>Displaying first 5 hours of temperature data.</small>
+                    `;
                 }
             } catch (error) {
-                resultDiv.textContent = "Error: Unable to calculate square.";
+                resultDiv.textContent = "Error fetching weather data.";
             }
         }
     </script>
