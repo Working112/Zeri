@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App (Open-Meteo)</title>
+    <title>Weather App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,9 +32,10 @@
     </style>
 </head>
 <body>
-    <h1>Weather App (Open-Meteo API)</h1>
-    <input type="number" step="0.01" id="latitude" placeholder="Enter Latitude">
-    <input type="number" step="0.01" id="longitude" placeholder="Enter Longitude">
+    <h1>Weather App</h1>
+    <p>Enter Latitude and Longitude to get the weather forecast:</p>
+    <input type="number" id="latitude" step="0.01" placeholder="Latitude">
+    <input type="number" id="longitude" step="0.01" placeholder="Longitude">
     <button onclick="fetchWeather()">Get Weather</button>
     <div id="result"></div>
 
@@ -45,7 +46,7 @@
             const resultDiv = document.getElementById("result");
 
             if (!latitude || !longitude) {
-                resultDiv.textContent = "Please enter both latitude and longitude.";
+                resultDiv.innerHTML = "Please enter both latitude and longitude.";
                 return;
             }
 
@@ -54,17 +55,17 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    resultDiv.textContent = `Error: ${data.error}`;
+                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
                     const temperatures = data.hourly.temperature_2m;
                     resultDiv.innerHTML = `
-                        <h3>Temperature Forecast:</h3>
+                        <h3>Hourly Temperature (First 5 Hours):</h3>
                         <p>${temperatures.slice(0, 5).join("°C, ")}°C...</p>
-                        <small>Displaying first 5 hours of temperature data.</small>
+                        <small>Data provided by Open-Meteo API</small>
                     `;
                 }
             } catch (error) {
-                resultDiv.textContent = "Error fetching weather data.";
+                resultDiv.innerHTML = "Error fetching weather data.";
             }
         }
     </script>
