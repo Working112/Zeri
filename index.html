@@ -57,11 +57,11 @@
                 if (data.error) {
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    const temperatures = data.hourly.temperature_2m;
+                    const temperatures = data.hourly.temperature_2m.slice(0, 5).join("°C, ");
                     resultDiv.innerHTML = `
-                        <h3>Hourly Temperature (First 5 Hours):</h3>
-                        <p>${temperatures.slice(0, 5).join("°C, ")}°C...</p>
-                        <small>Data provided by Open-Meteo API</small>
+                        <h3>Hourly Temperatures:</h3>
+                        <p>${temperatures}°C...</p>
+                        <small>Data from Open-Meteo API</small>
                     `;
                 }
             } catch (error) {
