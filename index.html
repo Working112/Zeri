@@ -7,7 +7,6 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             background-image: url('1.jpeg'); /* Default background */
             background-size: cover;
             background-repeat: no-repeat;
@@ -16,44 +15,53 @@
             margin: 0;
             padding: 0;
             height: 100vh;
-            transition: background-image 0.5s ease;
         }
-
         h1, p {
             color: white;
             text-shadow: 0 0 5px black;
         }
-
         input, button {
             padding: 10px;
             margin: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 16px;
         }
-
         button {
             background-color: #007bff;
             color: white;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
-
         button:hover {
             background-color: #0056b3;
         }
-
         #result {
             margin-top: 20px;
-            font-size: 18px;
             color: white;
             text-shadow: 0 0 5px black;
         }
-
-        .background-container {
-            margin-top: 20px;
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
         }
-
+        table, th, td {
+            border: 1px solid white;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 5px black;
+        }
+        th {
+            background-color: #007bff;
+        }
+        .background-container {
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
         .thumbnail {
             width: 100px;
             height: 70px;
@@ -62,7 +70,6 @@
             border: 2px solid transparent;
             transition: transform 0.3s ease, border 0.3s ease;
         }
-
         .thumbnail:hover {
             transform: scale(1.1);
             border: 2px solid #007bff;
@@ -81,7 +88,7 @@
     <div class="background-container" id="backgroundContainer"></div>
 
     <script>
-        const backgroundImages = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg"]; // List of JPEG placeholders
+        const backgroundImages = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg", "6.jpeg", "7.jpeg", "8.jpeg"];
         const backgroundContainer = document.getElementById("backgroundContainer");
 
         // Dynamically generate background thumbnails
@@ -119,12 +126,44 @@
                 if (data.error) {
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    const temperatures = data.hourly.temperature_2m.slice(0, 5).join("°C, ");
-                    resultDiv.innerHTML = `
-                        <h3>Hourly Temperatures:</h3>
-                        <p>${temperatures}°C...</p>
-                        <small>Data from Open-Meteo API</small>
-                    `;
+                    const tableData = {
+                        "Temperature (°C)": data.hourly.temperature_2m.slice(0, 5),
+                        "Precipitation (%)": data.hourly.precipitation_probability.slice(0, 5),
+                        "Wind Speed (m/s)": data.hourly.wind_speed_10m.slice(0, 5),
+                        "Humidity (%)": data.hourly.humidity_2m.slice(0, 5),
+                        "Cloud Cover (%)": data.hourly.cloudcover_mid.slice(0, 5),
+                        "Pressure (hPa)": data.hourly.pressure_msl.slice(0, 5),
+                        "Visibility (m)": data.hourly.visibility.slice(0, 5),
+                    };
+
+                    let tableHTML = `<table>
+                        <tr>
+                            <th>Time</th>
+                            <th>Temperature (°C)</th>
+                            <th>Precipitation (%)</th>
+                            <th>Wind Speed (m/s)</th>
+                            <th>Humidity (%)</th>
+                            <th>Cloud Cover (%)</th>
+                            <th>Pressure (hPa)</th>
+                            <th>Visibility (m)</th>
+                        </tr>`;
+
+                    for (let i = 0; i < 5; i++) {
+                        tableHTML += `
+                            <tr>
+                                <td>Hour ${i + 1}</td>
+                                <td>${tableData["Temperature (°C)"][i]}</td>
+                                <td>${tableData["Precipitation (%)"][i]}</td>
+                                <td>${tableData["Wind Speed (m/s)"][i]}</td>
+                                <td>${tableData["Humidity (%)"][i]}</td>
+                                <td>${tableData["Cloud Cover (%)"][i]}</td>
+                                <td>${tableData["Pressure (hPa)"][i]}</td>
+                                <td>${tableData["Visibility (m)"][i]}</td>
+                            </tr>`;
+                    }
+
+                    tableHTML += `</table>`;
+                    resultDiv.innerHTML = tableHTML;
                 }
             } catch (error) {
                 resultDiv.innerHTML = "Error fetching weather data.";
