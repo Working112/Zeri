@@ -8,26 +8,64 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            background-image: url('1.jpeg'); /* Default background */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
             text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            transition: background-image 0.5s ease;
         }
+
+        h1, p {
+            color: white;
+            text-shadow: 0 0 5px black;
+        }
+
         input, button {
             padding: 10px;
             margin: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            font-size: 16px;
         }
+
         button {
             background-color: #007bff;
             color: white;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         #result {
             margin-top: 20px;
             font-size: 18px;
+            color: white;
+            text-shadow: 0 0 5px black;
+        }
+
+        .background-container {
+            margin-top: 20px;
+        }
+
+        .thumbnail {
+            width: 100px;
+            height: 70px;
+            margin: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s ease, border 0.3s ease;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+            border: 2px solid #007bff;
         }
     </style>
 </head>
@@ -39,7 +77,31 @@
     <button onclick="fetchWeather()">Get Weather</button>
     <div id="result"></div>
 
+    <h2 style="color: white; text-shadow: 0 0 5px black;">Change Background</h2>
+    <div class="background-container" id="backgroundContainer"></div>
+
     <script>
+        const backgroundImages = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg"]; // List of JPEG placeholders
+        const backgroundContainer = document.getElementById("backgroundContainer");
+
+        // Dynamically generate background thumbnails
+        function loadBackgrounds() {
+            backgroundImages.forEach((imgUrl, index) => {
+                const img = document.createElement("img");
+                img.src = imgUrl;
+                img.alt = `Background ${index + 1}`;
+                img.classList.add("thumbnail");
+                img.onclick = () => changeBackground(imgUrl);
+                backgroundContainer.appendChild(img);
+            });
+        }
+
+        // Change the background image
+        function changeBackground(imageUrl) {
+            document.body.style.backgroundImage = `url('${imageUrl}')`;
+        }
+
+        // Fetch weather data
         async function fetchWeather() {
             const latitude = document.getElementById("latitude").value;
             const longitude = document.getElementById("longitude").value;
@@ -68,6 +130,9 @@
                 resultDiv.innerHTML = "Error fetching weather data.";
             }
         }
+
+        // Load background thumbnails on page load
+        loadBackgrounds();
     </script>
 </body>
 </html>
