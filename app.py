@@ -1,12 +1,20 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask_cors import CORS  # For CORS handling
 import requests
+import os
 
-app = Flask(__name__, static_folder="", template_folder="")  # Root directory
+app = Flask(__name__, static_folder="static", template_folder="")  # Set static folder for images
+CORS(app)  # Enable CORS for all routes
 
 # Route to serve the HTML file
 @app.route("/")
 def home():
-    return send_file("index.html")  # Serve index.html directly
+    return send_file("index.html")  # Serve index.html
+
+# Route to serve static files (images)
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory("static", filename)  # Serve images from 'static' folder
 
 # Route to fetch weather data
 @app.route("/weather", methods=["GET"])
