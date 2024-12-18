@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('/static/1.jpeg');
+            background-image: url('static/1');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -38,23 +38,6 @@
             margin-top: 20px;
             color: white;
             text-shadow: 0 0 5px black;
-        }
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid white;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-            color: white;
-            text-shadow: 0 0 5px black;
-        }
-        th {
-            background-color: #007bff;
         }
         .background-container {
             margin: 20px auto;
@@ -88,27 +71,24 @@
     <div class="background-container" id="backgroundContainer"></div>
 
     <script>
-        const backgroundImages = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg", "6.jpeg", "7.jpeg", "8.jpeg"];
+        const backgroundImages = ["static/1", "static/2", "static/3", "static/4"];
         const backgroundContainer = document.getElementById("backgroundContainer");
 
-        // Dynamically generate background thumbnails
         function loadBackgrounds() {
             backgroundImages.forEach((imgUrl, index) => {
                 const img = document.createElement("img");
-                img.src = `/static/${imgUrl}`;
+                img.src = imgUrl;
                 img.alt = `Background ${index + 1}`;
                 img.classList.add("thumbnail");
-                img.onclick = () => changeBackground(`/static/${imgUrl}`);
+                img.onclick = () => changeBackground(imgUrl);
                 backgroundContainer.appendChild(img);
             });
         }
 
-        // Change the background image
         function changeBackground(imageUrl) {
             document.body.style.backgroundImage = `url('${imageUrl}')`;
         }
 
-        // Fetch weather data
         async function fetchWeather() {
             const latitude = document.getElementById("latitude").value;
             const longitude = document.getElementById("longitude").value;
@@ -128,14 +108,12 @@
                 } else {
                     const hourly = data.hourly;
                     let resultHTML = "<h3>Weather Data (First 5 Hours)</h3><table>";
-                    resultHTML += "<tr><th>Time</th><th>Temperature (°C)</th><th>Precipitation (%)</th><th>Wind Speed (m/s)</th></tr>";
+                    resultHTML += "<tr><th>Time</th><th>Temperature (°C)</th></tr>";
 
                     for (let i = 0; i < 5; i++) {
                         resultHTML += `<tr>
                             <td>Hour ${i + 1}</td>
                             <td>${hourly.temperature_2m[i]}</td>
-                            <td>${hourly.precipitation_probability[i]}</td>
-                            <td>${hourly.wind_speed_10m[i]}</td>
                         </tr>`;
                     }
                     resultHTML += "</table>";
@@ -146,7 +124,6 @@
             }
         }
 
-        // Load background thumbnails on page load
         loadBackgrounds();
     </script>
 </body>
