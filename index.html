@@ -1,73 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            margin-top: 50px;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Weather App</h1>
-    <p>Enter Latitude and Longitude to get the weather forecast:</p>
-    <input type="number" id="latitude" step="0.01" placeholder="Latitude">
-    <input type="number" id="longitude" step="0.01" placeholder="Longitude">
-    <button onclick="fetchWeather()">Get Weather</button>
-    <div id="result"></div>
+from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask_cors import CORS
+import requests
 
-    <script>
-        async function fetchWeather() {
-            const latitude = document.getElementById("latitude").value;
-            const longitude = document.getElementById("longitude").value;
-            const resultDiv = document.getElementById("result");
+app = Flask(__name__, static_folder="static", template_folder="")
+CORS(app)
 
-            if (!latitude || !longitude) {
-                resultDiv.innerHTML = "Please enter both latitude and longitude.";
-                return;
-            }
+@app.route("/")
+def home():
+    return send_file("index.html")
 
-            try {
-                const response = await fetch(`/weather?latitude=${latitude}&longitude=${longitude}`);
-                const data = await response.json();
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory("static", filename)
 
-                if (data.error) {
-                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
-                } else {
-                    const temperatures = data.hourly.temperature_2m;
-                    resultDiv.innerHTML = `
-                        <h3>Hourly Temperature (First 5 Hours):</h3>
-                        <p>${temperatures.slice(0, 5).join("°C, ")}°C...</p>
-                        <small>Data provided by Open-Meteo API</small>
-                    `;
-                }
-            } catch (error) {
-                resultDiv.innerHTML = "Error fetching weather data.";
-            }
-        }
-    </script>
-</body>
-</html>
+@app.route("/weather", methods=["GET"])
+def get_weather():
+    try:
+        latitude = request.args.get("latitude")
+        longitude = request.args.get("longitude")
+        if not latitude or not longitude:
+            return jsonify({"error": "Latitude and longitude are required!"}), 400
+        url = (
+            f"https://api.open-meteo.com/v1/forecast?"
+            f"latitude={latitude}&longitude={longitude}"
+            f"&hourly=temperature_2m"
+        )
+        response = requests.get(url)
+        if response.status_code != 200:
+            return jsonify({"error": "Failed to fetch weather data"}), response.status_code
+        weather_data = response.json()
+        return jsonify(weather_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)
