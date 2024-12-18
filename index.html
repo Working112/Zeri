@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('1.jpeg'); /* Default background */
+            background-image: url('/static/1.jpeg');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -88,17 +88,17 @@
     <div class="background-container" id="backgroundContainer"></div>
 
     <script>
-        const backgroundImages = ["1", "2", "3", "4", "5", "6", "7", "8"];
+        const backgroundImages = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg", "6.jpeg", "7.jpeg", "8.jpeg"];
         const backgroundContainer = document.getElementById("backgroundContainer");
 
         // Dynamically generate background thumbnails
         function loadBackgrounds() {
             backgroundImages.forEach((imgUrl, index) => {
                 const img = document.createElement("img");
-                img.src = imgUrl;
+                img.src = `/static/${imgUrl}`;
                 img.alt = `Background ${index + 1}`;
                 img.classList.add("thumbnail");
-                img.onclick = () => changeBackground(imgUrl);
+                img.onclick = () => changeBackground(`/static/${imgUrl}`);
                 backgroundContainer.appendChild(img);
             });
         }
@@ -126,44 +126,20 @@
                 if (data.error) {
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    const tableData = {
-                        "Temperature (°C)": data.hourly.temperature_2m.slice(0, 5),
-                        "Precipitation (%)": data.hourly.precipitation_probability.slice(0, 5),
-                        "Wind Speed (m/s)": data.hourly.wind_speed_10m.slice(0, 5),
-                        "Humidity (%)": data.hourly.humidity_2m.slice(0, 5),
-                        "Cloud Cover (%)": data.hourly.cloudcover_mid.slice(0, 5),
-                        "Pressure (hPa)": data.hourly.pressure_msl.slice(0, 5),
-                        "Visibility (m)": data.hourly.visibility.slice(0, 5),
-                    };
-
-                    let tableHTML = `<table>
-                        <tr>
-                            <th>Time</th>
-                            <th>Temperature (°C)</th>
-                            <th>Precipitation (%)</th>
-                            <th>Wind Speed (m/s)</th>
-                            <th>Humidity (%)</th>
-                            <th>Cloud Cover (%)</th>
-                            <th>Pressure (hPa)</th>
-                            <th>Visibility (m)</th>
-                        </tr>`;
+                    const hourly = data.hourly;
+                    let resultHTML = "<h3>Weather Data (First 5 Hours)</h3><table>";
+                    resultHTML += "<tr><th>Time</th><th>Temperature (°C)</th><th>Precipitation (%)</th><th>Wind Speed (m/s)</th></tr>";
 
                     for (let i = 0; i < 5; i++) {
-                        tableHTML += `
-                            <tr>
-                                <td>Hour ${i + 1}</td>
-                                <td>${tableData["Temperature (°C)"][i]}</td>
-                                <td>${tableData["Precipitation (%)"][i]}</td>
-                                <td>${tableData["Wind Speed (m/s)"][i]}</td>
-                                <td>${tableData["Humidity (%)"][i]}</td>
-                                <td>${tableData["Cloud Cover (%)"][i]}</td>
-                                <td>${tableData["Pressure (hPa)"][i]}</td>
-                                <td>${tableData["Visibility (m)"][i]}</td>
-                            </tr>`;
+                        resultHTML += `<tr>
+                            <td>Hour ${i + 1}</td>
+                            <td>${hourly.temperature_2m[i]}</td>
+                            <td>${hourly.precipitation_probability[i]}</td>
+                            <td>${hourly.wind_speed_10m[i]}</td>
+                        </tr>`;
                     }
-
-                    tableHTML += `</table>`;
-                    resultDiv.innerHTML = tableHTML;
+                    resultHTML += "</table>";
+                    resultDiv.innerHTML = resultHTML;
                 }
             } catch (error) {
                 resultDiv.innerHTML = "Error fetching weather data.";
