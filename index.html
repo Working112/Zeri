@@ -7,18 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('static/1');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background-color: #f4f4f4;
             text-align: center;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-        }
-        h1, p {
-            color: white;
-            text-shadow: 0 0 5px black;
+            margin-top: 50px;
         }
         input, button {
             padding: 10px;
@@ -36,26 +27,7 @@
         }
         #result {
             margin-top: 20px;
-            color: white;
-            text-shadow: 0 0 5px black;
-        }
-        .background-container {
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .thumbnail {
-            width: 100px;
-            height: 70px;
-            margin: 10px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: transform 0.3s ease, border 0.3s ease;
-        }
-        .thumbnail:hover {
-            transform: scale(1.1);
-            border: 2px solid #007bff;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -67,28 +39,7 @@
     <button onclick="fetchWeather()">Get Weather</button>
     <div id="result"></div>
 
-    <h2 style="color: white; text-shadow: 0 0 5px black;">Change Background</h2>
-    <div class="background-container" id="backgroundContainer"></div>
-
     <script>
-        const backgroundImages = ["static/1", "static/2", "static/3", "static/4"];
-        const backgroundContainer = document.getElementById("backgroundContainer");
-
-        function loadBackgrounds() {
-            backgroundImages.forEach((imgUrl, index) => {
-                const img = document.createElement("img");
-                img.src = imgUrl;
-                img.alt = `Background ${index + 1}`;
-                img.classList.add("thumbnail");
-                img.onclick = () => changeBackground(imgUrl);
-                backgroundContainer.appendChild(img);
-            });
-        }
-
-        function changeBackground(imageUrl) {
-            document.body.style.backgroundImage = `url('${imageUrl}')`;
-        }
-
         async function fetchWeather() {
             const latitude = document.getElementById("latitude").value;
             const longitude = document.getElementById("longitude").value;
@@ -106,25 +57,17 @@
                 if (data.error) {
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    const hourly = data.hourly;
-                    let resultHTML = "<h3>Weather Data (First 5 Hours)</h3><table>";
-                    resultHTML += "<tr><th>Time</th><th>Temperature (°C)</th></tr>";
-
-                    for (let i = 0; i < 5; i++) {
-                        resultHTML += `<tr>
-                            <td>Hour ${i + 1}</td>
-                            <td>${hourly.temperature_2m[i]}</td>
-                        </tr>`;
-                    }
-                    resultHTML += "</table>";
-                    resultDiv.innerHTML = resultHTML;
+                    const temperatures = data.hourly.temperature_2m;
+                    resultDiv.innerHTML = `
+                        <h3>Hourly Temperature (First 5 Hours):</h3>
+                        <p>${temperatures.slice(0, 5).join("°C, ")}°C...</p>
+                        <small>Data provided by Open-Meteo API</small>
+                    `;
                 }
             } catch (error) {
                 resultDiv.innerHTML = "Error fetching weather data.";
             }
         }
-
-        loadBackgrounds();
     </script>
 </body>
 </html>
