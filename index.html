@@ -1,37 +1,130 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory
-from flask_cors import CORS
-import requests
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('static/1');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+        h1, p {
+            color: white;
+            text-shadow: 0 0 5px black;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            color: white;
+            text-shadow: 0 0 5px black;
+        }
+        .background-container {
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .thumbnail {
+            width: 100px;
+            height: 70px;
+            margin: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s ease, border 0.3s ease;
+        }
+        .thumbnail:hover {
+            transform: scale(1.1);
+            border: 2px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Weather App</h1>
+    <p>Enter Latitude and Longitude to get the weather forecast:</p>
+    <input type="number" id="latitude" step="0.01" placeholder="Latitude">
+    <input type="number" id="longitude" step="0.01" placeholder="Longitude">
+    <button onclick="fetchWeather()">Get Weather</button>
+    <div id="result"></div>
 
-app = Flask(__name__, static_folder="static", template_folder="")
-CORS(app)
+    <h2 style="color: white; text-shadow: 0 0 5px black;">Change Background</h2>
+    <div class="background-container" id="backgroundContainer"></div>
 
-@app.route("/")
-def home():
-    return send_file("index.html")
+    <script>
+        const backgroundImages = ["static/1", "static/2", "static/3", "static/4", "static/5", "static/6", "static/7", "static/8"];
+        const backgroundContainer = document.getElementById("backgroundContainer");
 
-@app.route("/static/<path:filename>")
-def static_files(filename):
-    return send_from_directory("static", filename)
+        function loadBackgrounds() {
+            backgroundImages.forEach((imgUrl, index) => {
+                const img = document.createElement("img");
+                img.src = imgUrl;
+                img.alt = `Background ${index + 1}`;
+                img.classList.add("thumbnail");
+                img.onclick = () => changeBackground(imgUrl);
+                backgroundContainer.appendChild(img);
+            });
+        }
 
-@app.route("/weather", methods=["GET"])
-def get_weather():
-    try:
-        latitude = request.args.get("latitude")
-        longitude = request.args.get("longitude")
-        if not latitude or not longitude:
-            return jsonify({"error": "Latitude and longitude are required!"}), 400
-        url = (
-            f"https://api.open-meteo.com/v1/forecast?"
-            f"latitude={latitude}&longitude={longitude}"
-            f"&hourly=temperature_2m"
-        )
-        response = requests.get(url)
-        if response.status_code != 200:
-            return jsonify({"error": "Failed to fetch weather data"}), response.status_code
-        weather_data = response.json()
-        return jsonify(weather_data)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        function changeBackground(imageUrl) {
+            document.body.style.backgroundImage = `url('${imageUrl}')`;
+        }
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        async function fetchWeather() {
+            const latitude = document.getElementById("latitude").value;
+            const longitude = document.getElementById("longitude").value;
+            const resultDiv = document.getElementById("result");
+
+            if (!latitude || !longitude) {
+                resultDiv.innerHTML = "Please enter both latitude and longitude.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/weather?latitude=${latitude}&longitude=${longitude}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+                } else {
+                    const hourly = data.hourly;
+                    let resultHTML = "<h3>Weather Data (First 5 Hours)</h3><table>";
+                    resultHTML += "<tr><th>Time</th><th>Temperature (°C)</th></tr>";
+
+                    for (let i = 0; i < 5; i++) {
+                        resultHTML += `<tr>
+                            <td>Hour ${i + 1}</td>
+                            <td>${hourly.temperature_2m[i]}</td>
+                        </tr>`;
+                    }
+                    resultHTML += "</table>";
+                    resultDiv.innerHTML = resultHTML;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = "Error fetching weather data.";
+            }
+        }
+
+        loadBackgrounds();
+    </script>
+</body>
+</html>
