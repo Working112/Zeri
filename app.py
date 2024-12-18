@@ -1,18 +1,16 @@
 from flask import Flask, request, jsonify, send_file
 import requests
 
-app = Flask(__name__, static_folder="", template_folder="")  # Use the current root directory
+app = Flask(__name__, static_folder="", template_folder="")
 
-# Route to serve the HTML file
 @app.route("/")
 def home():
-    return send_file("index.html")  # Serve index.html directly from root folder
+    return send_file("index.html")  
 
-# Route to fetch weather data from Open-Meteo API
 @app.route("/weather", methods=["GET"])
 def get_weather():
     try:
-        # Get latitude and longitude from query parameters
+        # Get latitude and longitude
         latitude = request.args.get("latitude")
         longitude = request.args.get("longitude")
 
